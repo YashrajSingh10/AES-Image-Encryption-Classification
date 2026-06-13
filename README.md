@@ -1,7 +1,6 @@
 # AES Encryption Mode Classification using CNN
 
 ## Overview
-Ye pura AI se likhvaya hai.
 
 This project investigates whether a Convolutional Neural Network (CNN) can distinguish between images encrypted using different AES encryption modes.
 
