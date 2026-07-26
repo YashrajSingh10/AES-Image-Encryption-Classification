@@ -199,23 +199,7 @@ The generated encrypted images were split using an 80:20 train-validation ratio.
 
 ---
 
-## Repository Structure
 
-```text
-AES-Encryption-Mode-Classification
-│
-├── Experiment1_ECB_CBC.ipynb
-├── Experiment2_CBC_CTR_FixedCounter.ipynb
-├── Experiment3_CBC_CTR_VariableCounter.ipynb
-├── Experiment4_CBC_CTR_CFB_OFB.ipynb
-├── README.md
-├── requirements.txt
-├── confusion_matrix.png
-├── loss_curve.png
-└── intel_aes_classifier.pth
-```
-
----
 
 ## Future Work
 
