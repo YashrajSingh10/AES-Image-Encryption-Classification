@@ -4,11 +4,7 @@
 
 This project investigates whether a Convolutional Neural Network (CNN) can distinguish between images encrypted using different AES encryption modes.
 
-Using the Intel Image Classification Dataset, AES-ECB and AES-CBC encrypted versions of each image were generated and a CNN was trained to classify images into three categories:
-
-* Original
-* AES-ECB
-* AES-CBC
+Using the Intel Image Classification Dataset, multiple experiments were conducted to analyze the ability of CNNs to classify encrypted images under different AES modes and initialization strategies. The project includes comparisons between ECB, CBC, CTR, CFB, and OFB encryption modes, along with an analysis of the effect of random and fixed Initialization Vectors (IVs) and nonces on classification performance.
 
 ---
 
@@ -16,43 +12,95 @@ Using the Intel Image Classification Dataset, AES-ECB and AES-CBC encrypted vers
 
 **Intel Image Classification Dataset**
 
-* Original Images: 14,034
-* Image Size: 150 × 150
-* Classes:
+- Original Images: 14,034
+- Image Size: 150 × 150
 
-  * Buildings
-  * Forest
-  * Glacier
-  * Mountain
-  * Sea
-  * Street
+Classes:
+
+- Buildings
+- Forest
+- Glacier
+- Mountain
+- Sea
+- Street
 
 Dataset Source:
+
 https://www.kaggle.com/datasets/puneet6060/intel-image-classification
 
 ---
 
-## Data Generation
+## Experiments
 
-For every original image:
+### Experiment 1: Original vs ECB vs CBC
 
-1. Original image retained
-2. AES-ECB encrypted image generated
-3. AES-CBC encrypted image generated
+The original images were encrypted using ECB and CBC modes.
 
-This expanded the dataset from:
+Classes:
 
-* 14,034 original images
+- Original
+- AES-ECB
+- AES-CBC
 
-to
+Total Samples: **42,102**
 
-* 42,102 total samples
+Validation Accuracy: **96.71%**
 
-| Class    | Samples |
-| -------- | ------- |
-| Original | 14,034  |
-| AES-ECB  | 14,034  |
-| AES-CBC  | 14,034  |
+---
+
+### Experiment 2: CBC vs CTR (Fixed Counter Initialization)
+
+The original images were encrypted using CBC and CTR modes. CTR encryption was performed using a fixed counter initialization to study whether the CNN could distinguish between the two encryption modes.
+
+Classes:
+
+- AES-CBC
+- AES-CTR
+
+Total Samples: **28,068**
+
+---
+
+### Experiment 3: CBC vs CTR (Variable Counter Initialization)
+
+The experiment was repeated using a variable (random) counter initialization for CTR mode while keeping the CNN architecture unchanged. This allowed evaluation of the effect of counter initialization on classification performance.
+
+Classes:
+
+- AES-CBC
+- AES-CTR
+
+Total Samples: **28,068**
+
+---
+
+### Experiment 4: CBC vs CTR vs CFB vs OFB
+
+ECB was replaced with the more secure CFB and OFB modes to evaluate CNN performance on four AES encryption modes.
+
+Two experiments were conducted.
+
+#### Experiment 4A: Random IV / Nonce
+
+- Random IV for CBC, CFB, and OFB
+- Random nonce for CTR
+
+Result:
+
+- Validation Accuracy: **25.00%**
+
+Since a new IV/nonce was generated for every image, the encrypted outputs changed every time, leaving almost no consistent patterns for the CNN to learn.
+
+#### Experiment 4B: Fixed IV / Nonce
+
+- Fixed IV for CBC, CFB, and OFB
+- Fixed nonce for CTR
+
+Result:
+
+- Validation Accuracy: **98.40%**
+
+Using fixed initialization produced consistent encrypted outputs for each mode, allowing the CNN to learn mode-specific characteristics and classify the encryption modes successfully.
 
 ---
 
@@ -60,88 +108,106 @@ to
 
 ### Image Processing
 
-* Resize images to 150 × 150
-* Random horizontal flip
-* Random rotation (±10°)
-* Normalization to [0,1]
+- Resize images to 150 × 150
+- Random Horizontal Flip
+- Random Rotation (±10°)
+- Normalize pixel values to [0,1]
 
-### Encryption
+### AES Encryption
 
-AES-128 encryption was implemented using:
+AES-128 encryption was implemented using the following modes:
 
-* ECB (Electronic Codebook) Mode
-* CBC (Cipher Block Chaining) Mode
+- ECB (Electronic Codebook)
+- CBC (Cipher Block Chaining)
+- CTR (Counter Mode)
+- CFB (Cipher Feedback)
+- OFB (Output Feedback)
 
-### Model
+Different experiments were performed using both random and fixed Initialization Vectors (IVs) and nonces to study their impact on CNN-based encryption mode classification.
 
-A Convolutional Neural Network (CNN) was trained using PyTorch to classify images into:
+### CNN Architecture
 
-* Original
-* ECB
-* CBC
+A Convolutional Neural Network (CNN) was implemented using PyTorch.
+
+Architecture:
+
+- Convolution Layer (32 Filters)
+- ReLU
+- Max Pooling
+
+- Convolution Layer (64 Filters)
+- ReLU
+- Max Pooling
+
+- Convolution Layer (128 Filters)
+- ReLU
+- Max Pooling
+
+- Convolution Layer (256 Filters)
+- ReLU
+- Max Pooling
+
+- Fully Connected Layer (512 Neurons)
+
+- Output Layer
+
+The same CNN architecture was used across all experiments.
 
 ---
 
 ## Train-Test Split
 
-* Training Images: 11,227
-* Validation Images: 2,807
+Training Images: **11,227**
 
-After expansion:
+Validation Images: **2,807**
 
-* Training Samples: 33,681
-* Validation Samples: 8,421
+The generated encrypted images were split using an 80:20 train-validation ratio.
 
 ---
 
-## Results
+## Experimental Results
 
-### Best Validation Accuracy
-
-98.57%
-
-### Confusion Matrix
-
-| Actual \ Predicted | Original | ECB  | CBC  |
-| ------------------ | -------- | ---- | ---- |
-| Original           | 2807     | 0    | 0    |
-| ECB                | 0        | 2661 | 146  |
-| CBC                | 0        | 4    | 2803 |
-
-### Classification Performance
-
-* Original Accuracy: 100%
-* ECB Accuracy: 94.8%
-* CBC Accuracy: 99.86%
+| Experiment | Classes | Validation Accuracy |
+|------------|-----------------------------|----------------:|
+| Original vs ECB vs CBC | 3 | 96.71% |
+| CBC vs CTR (Fixed Counter) | 2 | *(Update)* |
+| CBC vs CTR (Variable Counter) | 2 | *(Update)* |
+| CBC vs CTR vs CFB vs OFB (Random IV/Nonce) | 4 | 25.00% |
+| CBC vs CTR vs CFB vs OFB (Fixed IV/Nonce) | 4 | 98.40% |
 
 ---
 
 ## Key Findings
 
-* CNNs can reliably distinguish AES-ECB and AES-CBC encrypted images when sufficient image resolution is available.
-* Small datasets such as CIFAR-10 (32×32 images) produced significantly lower performance (~66.7% accuracy).
-* Larger images (150×150) preserve enough statistical information for a CNN to learn differences between encryption modes.
+- CNNs can successfully distinguish different AES encryption modes when consistent encryption characteristics are present.
+- ECB preserves visible image patterns, making it easier to distinguish than the other AES modes.
+- Random IVs and nonces generate different ciphertexts for every encryption, resulting in almost no consistent learnable patterns and reducing the CNN accuracy to approximately **25%**.
+- Using fixed IVs and nonces produces consistent encrypted outputs, allowing the CNN to learn mode-specific characteristics and increasing the validation accuracy to **98.40%**.
+- Larger image resolutions preserve sufficient statistical information for CNN-based encryption mode classification.
 
 ---
 
 ## Technologies Used
 
-* Python
-* PyTorch
-* NumPy
-* Matplotlib
-* Scikit-Learn
-* Pillow
-* PyCryptodome
+- Python
+- PyTorch
+- NumPy
+- Matplotlib
+- Scikit-Learn
+- Pillow
+- PyCryptodome
 
 ---
 
 ## Repository Structure
 
 ```text
-AES-CNN-Encryption-Classifier
+AES-Encryption-Mode-Classification
 │
-├── AES_Image_Classification.ipynb
+├── Experiment1_ECB_CBC.ipynb
+├── Experiment2_CBC_CTR_FixedCounter.ipynb
+├── Experiment3_CBC_CTR_VariableCounter.ipynb
+├── Experiment4_CBC_CTR_CFB_OFB.ipynb
 ├── README.md
 ├── requirements.txt
 ├── confusion_matrix.png
@@ -149,16 +215,18 @@ AES-CNN-Encryption-Classifier
 └── intel_aes_classifier.pth
 ```
 
+---
+
 ## Future Work
 
-* Classification of CBC vs CTR encryption modes
-* Comparison with additional AES modes (CFB, OFB, GCM)
-* Deeper CNN architectures
-* Explainability and feature visualization
-* Analysis on larger image datasets
+- Investigate AES-GCM and authenticated encryption modes.
+- Evaluate deeper CNN architectures such as ResNet and EfficientNet.
+- Perform explainability analysis using Grad-CAM.
+- Extend the study to larger image datasets.
+- Compare AES-128, AES-192, and AES-256.
 
 ---
 
 ## Author
 
-Yashraj Singh
+**Yashraj Singh**
